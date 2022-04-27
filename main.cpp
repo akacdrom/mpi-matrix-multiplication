@@ -1,9 +1,8 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <iostream>
-#include <unistd.h>
 #include <time.h>
-#define N 800
+#define N 1000
 
 int sum = 0;
 
@@ -21,7 +20,7 @@ decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
         {
             for (int k = 0; k < N; k++)
             {
-                sum = sum + first_matrix[i][k] * second_matrix[k][j];
+                sum += first_matrix[i][k] * second_matrix[k][j];
             }
             new_sequential_matrix[i][j] = sum;
             sum = 0;
@@ -30,7 +29,7 @@ decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
     t = clock() - t;
     printf("Sequential Matrix multiplication is finished! ===> %f ms. \n", ((float)t) / CLOCKS_PER_SEC);
 
-    // Print sequential matrix
+    // print sequential matrix
     // for (int i = 0; i < N; i++)
     // {
     //     for (int k = 0; k < N; k++)
@@ -92,7 +91,7 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // Time measurement
+    // time measurement
     MPI_Reduce(&elapsed_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, root, MPI_COMM_WORLD);
     MPI_Reduce(&elapsed_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
     MPI_Reduce(&elapsed_time, &avg_time, 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
@@ -127,7 +126,7 @@ int main(int argc, char **argv)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    // If it is master create random arrays
+    // if it is master create random arrays
     // I might implenet "MPI_Iprobe()" for less aggressive polling while creation of arrays.
     if (my_rank == 0)
     {
@@ -143,7 +142,7 @@ int main(int argc, char **argv)
             }
         }
 
-        // Print First Matrix
+        // print First Matrix
         // for (int i = 0; i < N; i++)
         // {
         //     for (int k = 0; k < N; k++)
@@ -166,7 +165,7 @@ int main(int argc, char **argv)
             }
         }
 
-        // Print Second Matrix
+        // print Second Matrix
         // for (int i = 0; i < N; i++)
         // {
         //     for (int k = 0; k < N; k++)
@@ -179,16 +178,16 @@ int main(int argc, char **argv)
         printf("Parallel Matrix multiplication started...\n");
     }
 
-    // Wait for master process to finish create matrises
+    // wait for master process to finish create matrises
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // Both matrises and other arguments passed to parallel algorithm function
+    // both matrises and other arguments passed to parallel algorithm function
     ParallelAlgorithm(first_matrix, second_matrix, my_rank);
 
-    // Wait for all processes to finish parallel algorithm.
+    // wait for all processes to finish parallel algorithm.
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // I called serial algorithm before MPI_Finalize for not make unnecessary polling to other threads on CPU
+    // i called serial algorithm before MPI_Finalize for not make unnecessary polling to other threads on CPU
     if (my_rank == 0)
     {
         // both matrises passed to serial algorithm function
