@@ -116,7 +116,7 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
 
 int main(int argc, char **argv)
 {
-    // Allocate constant arrays in Heap memory.
+    // Allocate constant arrays in Heap memory instead of Stack.
     auto first_matrix = new int[N][N];
     auto second_matrix = new int[N][N];
 
