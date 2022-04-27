@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <time.h>
-#define N 10
+#define N 800
 
 int sum = 0;
 
@@ -31,14 +31,14 @@ decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
     printf("Sequential Matrix multiplication is finished! ===> %f ms. \n", ((float)t) / CLOCKS_PER_SEC);
 
     // Print sequential matrix
-    for (int i = 0; i < N; i++)
-    {
-        for (int k = 0; k < N; k++)
-        {
-            printf("%d ", new_sequential_matrix[i][k]);
-        }
-        printf("\n");
-    }
+    // for (int i = 0; i < N; i++)
+    // {
+    //     for (int k = 0; k < N; k++)
+    //     {
+    //         printf("%d ", new_sequential_matrix[i][k]);
+    //     }
+    //     printf("\n");
+    // }
     return new_sequential_matrix;
 }
 
@@ -80,10 +80,10 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
                 sum += recv_first_matrix[i][k] * second_matrix[k][j];
             }
             new_parallel_matrix[i][j] = sum;
-            printf("element: %d rank-> %d | ", sum, my_rank);
+            // printf("element: %d rank-> %d | ", sum, my_rank);
             sum = 0;
         }
-        printf("\n");
+        // printf("\n");
     }
     double elapsed_time = MPI_Wtime() - start_time;
     printf("    --> Rank %d is FINISHED to job. It took it %f ms.\n", my_rank, elapsed_time);
@@ -144,14 +144,14 @@ int main(int argc, char **argv)
         }
 
         // Print First Matrix
-        for (int i = 0; i < N; i++)
-        {
-            for (int k = 0; k < N; k++)
-            {
-                printf("%d ", first_matrix[i][k]);
-            }
-            printf("\n");
-        }
+        // for (int i = 0; i < N; i++)
+        // {
+        //     for (int k = 0; k < N; k++)
+        //     {
+        //         printf("%d ", first_matrix[i][k]);
+        //     }
+        //     printf("\n");
+        // }
         printf("First Matrix is created!\n");
 
         // Create Second Matrix
@@ -167,14 +167,14 @@ int main(int argc, char **argv)
         }
 
         // Print Second Matrix
-        for (int i = 0; i < N; i++)
-        {
-            for (int k = 0; k < N; k++)
-            {
-                printf("%d ", second_matrix[i][k]);
-            }
-            printf("\n");
-        }
+        // for (int i = 0; i < N; i++)
+        // {
+        //     for (int k = 0; k < N; k++)
+        //     {
+        //         printf("%d ", second_matrix[i][k]);
+        //     }
+        //     printf("\n");
+        // }
         printf("Second Matrix is created!\n");
         printf("Parallel Matrix multiplication started...\n");
     }
