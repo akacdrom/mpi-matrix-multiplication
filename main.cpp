@@ -1,19 +1,18 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <iostream>
-#include <time.h>
-#define N 1000
+#define N 100
 
 int sum = 0;
 
 // decltype keyword used to return auto data typed array.
 decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
 {
+    double start_time = MPI_Wtime();
+
     auto new_sequential_matrix = new int[N][N];
 
     printf("Sequential Matrix multiplication started...\n");
-    clock_t t;
-    t = clock();
     for (int i = 0; i < N; i++)
     {
         for (int j = 0; j < N; j++)
@@ -26,8 +25,8 @@ decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
             sum = 0;
         }
     }
-    t = clock() - t;
-    printf("Sequential Matrix multiplication is finished! ===> %f ms. \n", ((float)t) / CLOCKS_PER_SEC);
+    double elapsed_time = MPI_Wtime() - start_time;
+    printf("Sequential Matrix multiplication is finished! ===> %f ms. \n", elapsed_time);
 
     // print sequential matrix
     // for (int i = 0; i < N; i++)
@@ -41,9 +40,12 @@ decltype(auto) SerialAlgorithm(int first_matrix[][N], int second_matrix[][N])
     return new_sequential_matrix;
 }
 
-decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
-                                 int my_rank)
+decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N], int my_rank)
 {
+    // double data type to get ms.
+    double min_time, max_time, avg_time;
+    double start_time = MPI_Wtime();
+
     int size, root = 0;
 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -56,9 +58,6 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
     auto new_parallel_matrix = new int[N][N];
     auto new_parallel_matrix_gather = new int[N][N];
 
-    // double data type to get ms.
-    double min_time, max_time, avg_time;
-
     // get first matrix to all process as whole.
     MPI_Scatter(first_matrix, N * N / size, MPI_INT, recv_first_matrix, N * N / size, MPI_INT, root, MPI_COMM_WORLD);
 
@@ -68,7 +67,6 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
     MPI_Barrier(MPI_COMM_WORLD);
 
     printf("    --> Rank %d is STARTED to job.\n", my_rank);
-    double start_time = MPI_Wtime();
 
     for (int i = 0; i < chunk; i++)
     {
@@ -84,10 +82,12 @@ decltype(auto) ParallelAlgorithm(int first_matrix[][N], int second_matrix[][N],
         }
         // printf("\n");
     }
+
+    // gather the multiplicated matrix for return it
+    MPI_Gather(new_parallel_matrix, N * N / size, MPI_INT, new_parallel_matrix_gather, N * N / size, MPI_INT, root, MPI_COMM_WORLD);
+
     double elapsed_time = MPI_Wtime() - start_time;
     printf("    --> Rank %d is FINISHED to job. It took it %f ms.\n", my_rank, elapsed_time);
-
-    MPI_Gather(new_parallel_matrix, N * N / size, MPI_INT, new_parallel_matrix_gather, N * N / size, MPI_INT, root, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
